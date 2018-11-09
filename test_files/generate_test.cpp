@@ -12,7 +12,7 @@ int main () {
   //file << "Please writr this text to a file.\n this text is written using C++\n";
   file.close();
   */
-	int left=1,right=10;
+	int left=1,right=10000;
   int pos=0;
 	vector<int> arr(right-left+1);
 	for(int i=left;i<=right;i++){
@@ -29,7 +29,7 @@ int main () {
   //file << "Please writr this text to a file.\n this text is written using C++\n";
   file.close();
 
-  left=5,right=10;
+  left=1000,right=100000;
   vector<int> arr2(right-left+1);
   pos=0;
   for(int i=left;i<=right;i++){

@@ -164,6 +164,7 @@ public:
         std::vector<std::pair<int,T>> dup_table=table;
         table=new_table;
         sz=new_sz;
+        occupied=0;
         for(auto it : dup_table){
             if(it.first == filled){
                 T key=it.second;
@@ -185,6 +186,7 @@ public:
         std::vector<std::pair<int,T>> dup_table=table;
         table=new_table;
         sz=new_sz;
+        occupied=0;
         for(auto it : dup_table){
             if(it.first == filled){
                 T key=it.second;

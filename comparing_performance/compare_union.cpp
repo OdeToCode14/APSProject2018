@@ -5,8 +5,8 @@ typedef long long ll;
 using namespace std;
 
 int main(){
-    /*int first=10;
-    int second=6;
+    int first=10000;
+    int second=99001;
     vector<int> arr1(first);
 
     ifstream in1;
@@ -16,11 +16,11 @@ int main(){
         in1>>x;
         arr1[i]=x;
     }
-
+    //cout<<arr1.size()<<"\n";
     vector<int> arr2(second);
 
     ifstream in2;
-    in1.open("test_file2.txt");
+    in2.open("test_file2.txt");
     for(int i=0;i<second;i++){
         ll x;
         in2>>x;
@@ -31,14 +31,18 @@ int main(){
 	for(int i=0;i<first;i++){
         st1.insert(arr1[i]);
     }
+    //st1.print();
+    //cout<<st1.occupied<<"\n";
     hash_set<int> st2;
 	for(int i=0;i<second;i++){
         st2.insert(arr2[i]);
     }
+    //st2.print();
+    //cout<<st2.occupied<<"\n";
     hash_set<int> st3=st1.find_union(st2);
-    cout<<st3.occupied<<"\n";*/
-
-
+    //cout<<st3.occupied<<"\n";
+    st3.print();
+/*
     int left=1,right=10000;
     int pos=0;
 	vector<int> arr1(right-left+1);
@@ -67,6 +71,6 @@ int main(){
     hash_set<int> st3=st1.find_union(st2);
     st3.print();
     //cout<<st3.occupied<<"\n";
-
+*/
 	return 0;
 }
