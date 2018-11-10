@@ -384,22 +384,22 @@ class hash_set {
     }
     hash_set find_intersection(hash_set<K> other){
         hash_set<K> intr;
-        hash_set<K> smaller;
-        hash_set<K> bigger;
-        if(this->getCurrentSize() <= other.getCurrentSize){
+        hash_set<K> *smaller;
+        hash_set<K> *bigger;
+        if(this->getCurrentSize() <= other.getCurrentSize()){
             smaller=this;
-            bigger=other;
+            bigger=&other;
         }
         else{
-            smaller=other;
+            smaller=&other;
             bigger=this;
         }
-        for(int i=0;i<smaller.table_size;i++){
+        for(int i=0;i<smaller->table_size;i++){
             ///print the list for each bucket
-            HashNode<K>*entry = smaller.bucket[i];
+            HashNode<K>*entry = smaller->bucket[i];
             while(entry!=NULL){
                 //std::cout<<entry->getKey()<<":"<<entry->getValue()<<",";
-                if(bigger.find(entry->getKey())){
+                if(bigger->find(entry->getKey())){
                     intr.insert(entry->getKey());
                 }
                 entry = entry->getNext();
