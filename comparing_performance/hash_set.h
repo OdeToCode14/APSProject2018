@@ -15,7 +15,7 @@ using namespace std;
 
 template <class T> class hash_set{
 public:
-    //long long collision;
+    long long collision;
     std::vector<int> size_list={79, 163, 331, 673, 1361, 2729, 5471, 10949, 21911, 43853, 87719, 175447, 350899, 701819, 1403641, 2807303, 5614657, 11229331};
     int size_list_ptr;
     int sz;
@@ -58,7 +58,7 @@ public:
     }
 
     hash_set(){
-        //collision = 0;
+        collision = 0;
         size_list_ptr=0;
         occupied=0;
         sz=size_list[size_list_ptr];
@@ -94,6 +94,8 @@ public:
         long long hash=sum%sz;
         return (int) hash;
 
+        //string nkey = to_string(key);
+        //return get_hash(nkey);
         //return key%sz;
     }
     int get_hash(std::string key){
@@ -204,7 +206,7 @@ public:
 
         /* probing through the array until an unalloted or deleted space is found */
         while (table[i].first == filled) {
-                //collision++;
+                collision++;
 
             if (table[i].second == key) {
                 /* case when already present key matches the given key */
