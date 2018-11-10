@@ -5,10 +5,11 @@
 
 #include <chrono>
 typedef long long ll;
+using namespace std;
 using namespace std::chrono; 
 
 int main(){
-	hash_set<int> te;
+	/*hash_set<int> te;
 	auto start = high_resolution_clock::now();
 	for(int i=0;i<1000;i++){
 		te.insert(i);
@@ -16,12 +17,12 @@ int main(){
     auto stop = high_resolution_clock::now(); 
     auto duration = duration_cast<microseconds>(stop - start);
     cout << "Time taken by hash_set inserion: "<< duration.count() << " microseconds\n"; 
-
-	/*
+*/
+	
     int first=0;
     int second=0;
-    string file1="test_file1_10^6.txt";
-    string file2="test_file2_10^6.txt";
+    string file1="test_file1_10^4.txt";
+    string file2="test_file2_10^4.txt";
    
 
    //calculate first and second sizes
@@ -109,7 +110,7 @@ cout<<"sizes of two files "<<first<<" " << second<<"\n";
     
     auto stop = high_resolution_clock::now(); 
     auto duration = duration_cast<microseconds>(stop - start);
-    cout<<"number of collisions "<<hs_st3.collision<<"\n";
+    //cout<<"number of collisions "<<hs_st3.collision<<"\n";
     cout << "Time taken by hash_set find_union: "<< duration.count() << " microseconds\n"; 
     //cout<<hs_st3.occupied<<"\n";
     //hs_st3.print();
@@ -119,7 +120,7 @@ cout<<"sizes of two files "<<first<<" " << second<<"\n";
     stop = high_resolution_clock::now();
     duration = duration_cast<microseconds>(stop - start);
     cout << "Time taken by tree_set find_union: "<< duration.count() << " microseconds\n";
-    */
+    
     //cout<<tr_st3.occupied<<"\n";
     //tr_st3.print();
 /*

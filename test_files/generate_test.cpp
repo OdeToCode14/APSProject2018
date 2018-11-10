@@ -12,7 +12,7 @@ int main () {
   //file << "Please writr this text to a file.\n this text is written using C++\n";
   file.close();
   */
-	int left=1,right=1000000;
+	int left=1,right=100000;
   int pos=0;
 	vector<int> arr(right-left+1);
 	for(int i=left;i<=right;i++){
@@ -21,7 +21,7 @@ int main () {
 	random_shuffle(arr.begin(),arr.end());
 	
   ofstream file;
-  file.open ("test_file1_10^6.txt");
+  file.open ("test_file1_10^5.txt");
   for(int i=0;i<arr.size();i++){
 	 file<<arr[i]<<"\n";
   }
@@ -29,7 +29,7 @@ int main () {
   //file << "Please writr this text to a file.\n this text is written using C++\n";
   file.close();
 
-  left=500001,right=1500000;
+  left=50001,right=150000;
   vector<int> arr2(right-left+1);
   pos=0;
   for(int i=left;i<=right;i++){
@@ -38,7 +38,7 @@ int main () {
   random_shuffle(arr2.begin(),arr2.end());
   
   ofstream file2;
-  file2.open ("test_file2_10^6.txt");
+  file2.open ("test_file2_10^5.txt");
   for(int i=0;i<arr2.size();i++){
     file2<<arr2[i]<<"\n";
   }

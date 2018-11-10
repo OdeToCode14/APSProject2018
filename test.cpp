@@ -1,4 +1,4 @@
-#include "tree_set.h"
+#include "hash_set.h"
 //using namespace std;
 
 int main(){
@@ -10,20 +10,20 @@ int main(){
     std::cout<<tree.find_smallest().second<<"\n";
     */
 
-    tree_set<int> st1;
+    hash_set<int> st1;
     for(int i=1;i<=25;i++){
         st1.insert(i);
     }
     //std::cout<<st1.collision<<"\n";
-    tree_set<int> st2;
+    hash_set<int> st2;
     for(int i=10;i<=50;i++){
         st2.insert(i);
     }
-    tree_set<int> st3=st1.find_intersection(st2);
+    hash_set<int> st3=st1.find_intersection(st2);
     st3.print();
-    tree_set<int> st4=st1.find_union(st2);
+    hash_set<int> st4=st1.find_union(st2);
     st4.print();
-    tree_set<int> st5=st1.find_difference(st2);
+    hash_set<int> st5=st1.find_difference(st2);
     std::cout<<"diff\n";
     st5.print();
     

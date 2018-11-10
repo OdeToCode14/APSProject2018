@@ -1,304 +1,421 @@
 #ifndef HASH_SET_H
 #define HASH_SET_H
 
-#include <bits/stdc++.h>
-#define unalloted 0
-#define filled 1
-#define deleted 2
-#define upper_bound 0.8
+#include<bits/stdc++.h>
+#define upper_bound 0.7
 #define lower_bound 0.2
+int t_size[]={7,17,37,79,163,6,673,1361,2729,5471,10949,21911,43853,87719,175447,350899,701819,1403641,2807303,5614657,11229331};
+template <typename K>
+class HashNode{
 
+    private:
+    // key - value pair to be stored in the map
+    K key;
+    //V value;
+    //pointer to next node with the same key-hash
+    HashNode *next;
+    //hash of key
+    int hash;
 
-using namespace std;
-//typedef long long ll;
-
-
-template <class T> class hash_set{
-public:
-    //long long collision;
-    std::vector<int> size_list={79, 163, 331, 673, 1361, 2729, 5471, 10949, 21911, 43853, 87719, 175447, 350899, 701819, 1403641, 2807303, 5614657, 11229331};
-    int size_list_ptr;
-    int sz;
-    int occupied;
-    std::vector<std::pair<int,T>> table;
-    int number_of_digits=12;
-    std::vector<long long> power;
-    void find_power(){
-        long long prime=37;
-        power[0]=1;
-        for(int i=1;i<number_of_digits;i++){
-            power[i]=power[i-1]*prime;
-            //std::cout<<power[i]<<"\n";
-        }
+    public:
+    HashNode (const K &key){
+        this->key = key;
+        //this->value = value;
+        this->next = NULL;
     }
 
-    int next_prime(int num) {
-        while(true){
-            num++;
-            // Corner cases
-            bool flag=true;
-            if(num<=2){
-                return 3;
-            }
-            if (num%2 == 0 || num%3 == 0){
-                continue;
-            }
-
-            for (int i=5; i*i<=num; i=i+6){
-                if (num%i == 0 || num%(i+2) == 0){
-                   flag=false;
-                   break;
-                }
-            }
-            if(flag){
-                break;
-            }
-        }
-        return num;
+    K getKey() const{
+        return key;
     }
 
-    hash_set(){
-        //collision = 0;
-        size_list_ptr=0;
-        occupied=0;
-        sz=size_list[size_list_ptr];
-        table.resize(sz); //first one is status of cell (either occupied, filled or deleted) second is key value std::pair
-        power.resize(number_of_digits);
-        find_power();
-    }
-    /*
-    hash_set(int a){
-        occupied=0;
-        sz=a;
-        sz=next_prime(sz);
-        table.resize(sz);
-        power.resize(number_of_digits);
-        find_power();
-    }
-    */
+    /*V getValue() const{
+        return value;
+    }*/
 
-    int get_hash(int key){
+    /*void setValue(V value){
+        this->value=value;
+    }*/
 
-        long long prime=37;
-        std::vector<int> digits;
-        while(key>0){
-            int d=key%10;
-            key=key/10;
-            digits.push_back(d);
-        }
-        long long sum=0;
-        for(int i=digits.size()-1;i>=0;i--){
-            int d=digits[i];
-            sum=sum+d*power[digits.size()-i-1];
-        }
-        long long hash=sum%sz;
-        return (int) hash;
-
-        //return key%sz;
-    }
-    int get_hash(std::string key){
-       /*
-       int sum=0;
-       for (int i=0; i < key.length(); i++){
-         sum += key[i];
-       }
-       int hash=sum%sz;
-       return hash;
-       */
-         int chunk_size=4;
-         int number_of_chunks = key.length() / 4;
-         long long sum = 0;
-         for (int j = 0; j < number_of_chunks; j++) {
-                int start=j*chunk_size;
-                int last=start+3;
-           long long mult = 1;
-           for (int k = start; k <=last; k++) {
-             sum += key[k] * mult;
-             mult *= 256;
-           }
-         }
-         if(key.length() %4 != 0){
-                 int start=number_of_chunks*chunk_size;
-                 int last=key.length()-1;
-                 long long mult = 1;
-                 for (int k = start; k <=last; k++) {
-                   sum += key[k] * mult;
-                   mult *= 256;
-                 }
-         }
-         return(abs(sum) % sz);
+    HashNode *getNext() const{
+        return next;
     }
 
-    int find_hash(T key){
-        int hash;
-        std::string test_str;
-        int test_int;
-        if(typeid(key) == typeid(test_str)){
-                //std::cout<<"std::string\n";
-            hash=get_hash(key);
-            return hash;
-        }
-        else if (typeid(key) == typeid(test_int)){
-            //std::cout<<"int\n";
-            hash=get_hash(key);
-            return hash;
-        }
-        else{
-            return 0;
-        }
-        //std::cout<<"hash found is "<<hash<<"\n";
+    void setNext(HashNode *next){
+        this->next = next;
+    }
+
+    void setHash(int hash){
+        this->hash = hash;
+    }
+
+    int getHash(){
+        return hash;
     }
 
 
+};
 
-    void increase_table_size(){
-        //std::cout<<"here\n";
-        if(size_list_ptr == size_list.size()-1){
+template <typename K>
+class hash_set {
+
+    private:
+
+    int current_size;
+    int table_size;
+    double load_factor;
+    HashNode<K> **bucket;
+    int t_size_index=0;
+    public:
+
+    hash_set(int table_size=7){
+        current_size = 0;
+        this->load_factor=0;
+        this->table_size = table_size;
+        bucket = new HashNode<K> *[table_size];
+        for(int i=0;i<table_size;i++){
+            bucket[i]=NULL;
+        }
+    }
+
+    int getCurrentSize(){
+        return current_size;
+    }
+
+    void setCurrentSize(int c_size){
+        current_size = c_size;
+    }
+
+    int getTableSize(){
+        return table_size;
+    }
+
+    void setTableSize(int table_size){
+        this->table_size = table_size;
+    }
+
+    double getLoadFactor(){
+        return load_factor;
+    }
+
+    void setLoadFactor(double load_factor){
+        this->load_factor = load_factor;
+    }
+
+    int calculate_hash(int key){
+
+        int n = key;
+        int exp=0;
+        long long hash=0;
+        while(n!=0){
+            int digit = n%10;
+            hash+= digit * pow(37,exp);
+            n=n/10;
+            exp++;
+        }
+
+        int final_hash = (int) hash;
+        return final_hash;
+    }
+
+
+    int calculate_hash(std::string key){
+
+        double sum=0.0;
+        for(int i=0;i<key.size();i++){
+            sum = sum + key[i]*pow(47,i);
+        }
+
+        int final_hash=sum;
+
+        return final_hash;
+    }
+
+    int calculate_hash(float key){
+
+        const char * p = reinterpret_cast<const char*>(&key);
+        std::string str =p;
+        return calculate_hash(p);
+    }
+
+    int calculate_hash(double key){
+
+        const char * p = reinterpret_cast<const char*>(&key);
+        std::string str =p;
+        return calculate_hash(p);
+    }
+
+    int get_hash_set_index(int key_hash){
+        int index = ((key_hash%this->table_size)+this->table_size)%this->table_size;
+        return index;
+    }
+
+    void rehash(){
+        //std::cout<<"called"<<"\n";
+        //take hold of old bucket
+        int sz = sizeof(t_size)/sizeof(t_size[0]);
+
+        if(this->t_size_index == sz-1){
             return;
         }
-        size_list_ptr++;
-        //int new_sz=sz*2;
-        int new_sz=size_list[size_list_ptr];
-        //new_sz=next_prime(new_sz);
-        std::vector<std::pair<int,T>> new_table(new_sz);
-        std::vector<std::pair<int,T>> dup_table=table;
-        table=new_table;
-        sz=new_sz;
-        occupied=0;
-        for(auto it : dup_table){
-            if(it.first == filled){
-                T key=it.second;
-                //U value=it.second.second;
-                insert(key);
-            }
+        HashNode<K> **old_bucket = this->bucket;
+        int old_table_size = this->getTableSize();
+
+        this->t_size_index++;
+        //set current size to zero
+        //this->setCurrentSize(0);
+
+        //find new table size
+        int new_table_size = t_size[t_size_index];
+        //initialize new hash table with increased size.
+        HashNode<K> **new_bucket = new HashNode<K> *[new_table_size];
+        this->setTableSize(new_table_size);
+
+
+        //set the new bucket to the hash table
+        this->bucket = new_bucket;
+        this->setCurrentSize(0);
+        for(int i=0;i<new_table_size;i++){
+            new_bucket[i] = NULL;
         }
+        //iterate through the old table
+        for(int i=0;i<old_table_size;i++){
+            HashNode<K> *entry = old_bucket[i];
+            //if chain exists, then iterate over it and rehash into new table
+            while(entry!=NULL){
+                 insert(entry->getKey());
+                 entry = entry->getNext();
+            }
+
+            delete old_bucket[i];
+        }
+        //this->print();
+        delete [] old_bucket;
     }
 
-    void decrease_table_size(){
-        //int new_sz=sz/2;
-        if(size_list_ptr == 0){
+    void rehash_decrease(){
+        //std::cout<<"called"<<"\n";
+        //take hold of old bucket
+        if(this->t_size_index == 0){
             return;
         }
-        size_list_ptr--;
-        //new_sz=next_prime(new_sz);
-        int new_sz=size_list[size_list_ptr];
-        std::vector<std::pair<int,T>> new_table(new_sz);
-        std::vector<std::pair<int,T>> dup_table=table;
-        table=new_table;
-        sz=new_sz;
-        occupied=0;
-        for(auto it : dup_table){
-            if(it.first == filled){
-                T key=it.second;
-                //U value=it.second.second;
-                insert(key);
-            }
+        HashNode<K> **old_bucket = this->bucket;
+        int old_table_size = this->getTableSize();
+
+        this->t_size_index--;
+        //set current size to zero
+        //this->setCurrentSize(0);
+
+        //find new table size
+        int new_table_size = t_size[t_size_index];
+        //initialize new hash table with increased size.
+        HashNode<K> **new_bucket = new HashNode<K> *[new_table_size];
+        this->setTableSize(new_table_size);
+
+
+        //set the new bucket to the hash table
+        this->bucket = new_bucket;
+        this->setCurrentSize(0);
+        for(int i=0;i<new_table_size;i++){
+            new_bucket[i] = NULL;
         }
+        //iterate through the old table
+        for(int i=0;i<old_table_size;i++){
+            HashNode<K> *entry = old_bucket[i];
+            //if chain exists, then iterate over it and rehash into new table
+            while(entry!=NULL){
+                 insert(entry->getKey());
+                 entry = entry->getNext();
+            }
+
+            delete old_bucket[i];
+        }
+        //this->print();
+        delete [] old_bucket;
     }
 
-    void insert(T key){
-        int bucket=find_hash(key);
+    void insert(const K key) {
+        int key_hash = calculate_hash(key);
 
-        int i = bucket;
-        int h = 1;
+        int index = get_hash_set_index(key_hash);
 
-        /* probing through the array until an unalloted or deleted space is found */
-        while (table[i].first == filled) {
-                //collision++;
+        HashNode<K> *entry = bucket[index];
 
-            if (table[i].second == key) {
-                /* case when already present key matches the given key */
-                //printf("\n This key is already present in hash table, hence updating it's value \n");
-                table[i].second = key;
-                //std::cout<<i<<" "<<table[i].second.second<<"\n";
+        if(entry==NULL){
+
+            entry = new HashNode<K>(key);
+            entry->setHash(key_hash);
+            bucket[index] = entry;
+            //update the hash table size
+            this->setCurrentSize(this->getCurrentSize()+1);
+            //std::cout<<this->getCurrentSize()<<endl;
+            double load_factor = (double)this->getCurrentSize()/this->getTableSize();
+            this->setLoadFactor(load_factor);
+
+        }else{
+
+            //check if same key already exists
+            HashNode<K> *prev = NULL;
+
+            while (entry != NULL && entry->getKey() != key) {
+                prev = entry;
+                entry = entry->getNext();
+            }
+            if(entry==NULL){ //identical key was not found, but chain exits, so, add in front
+                entry = new HashNode<K>(key);
+                prev->setNext(entry);
+                entry->setHash(key_hash);
+                //entry = newEntry;
+
+            }else{ // identical key was found, update it.
+                //entry->setValue(value);
                 return;
             }
-            i = (i + (h * h)) % sz;
-            h++;
-            if (i == bucket){
-                increase_table_size();
-                insert(key);
-                //printf("\n Hash table is full, cannot add more elements \n");
-                //return;
-            }
 
+            //update hash table size
+            
         }
-        table[i].first = filled;
-        table[i].second = key;
-        //table[i].second.second = value;
-        //std::cout<<i<<" "<<table[i].second.second<<"\n";
-        //printf("\n Key  has been inserted\n");
-        occupied++;
-        double balance_factor=(double) occupied / (double) sz;
-        //std::cout<<"balance fact "<<balance_factor<<" "<<occupied<<" "<<sz<<"\n";
-        if(balance_factor > upper_bound){
-            increase_table_size();
-            //std::cout<<"new size "<<sz<<"\n";
+       //std::cout<<"BF: "<<this->getLoadFactor()<<endl;
+        //if balance factor > 0.7, rehash
+
+        this->setCurrentSize(this->getCurrentSize()+1);
+        double load_factor = (double)this->getCurrentSize()/this->getTableSize();
+        this->setLoadFactor(load_factor);
+
+        if(this->getLoadFactor()>upper_bound){
+            //rehash
+            rehash();
         }
+
+
     }
 
-    bool find(T key){
-        int bucket = find_hash(key);
-        int i = bucket;
-        int h = 1;
+    void erase(const K &key) {
+        int hash = this->calculate_hash(key);
+        int table_index = get_hash_set_index(hash);
+        HashNode<K> *prev = NULL;
+        HashNode<K> *entry = bucket[table_index];
 
-        /* probing through the hash table until we reach at location where there had not been an element even once */
-        while (table[i].first != unalloted){
-            if (table[i].first == filled  &&  table[i].second == key) {
+        while (entry != NULL && entry->getKey()!= key) {
+            prev = entry;
+            entry = entry->getNext();
+        }
 
-                /* case where data exists at the location and its key matches to the given key */
-                //U *ret=&(table[i].second.second);
-                //std::cout<<ret<<"\n";
-                //return ret;
-                //return table[i].second.second;
+        if (entry == NULL) {
+            // key not found
+            return;
+        }
+        else {
+            if (prev == NULL) {
+                // remove first bucket of the list
+                bucket[table_index] = entry->getNext();
+            } else {
+                prev->setNext(entry->getNext());
+            }
+            delete entry;
+            this->setCurrentSize(this->getCurrentSize()-1);
+            double load_factor = (double)this->getCurrentSize()/this->getTableSize();
+            this->setLoadFactor(load_factor);
+
+        }
+
+        if(this->getLoadFactor() < lower_bound){
+            //rehash
+            rehash_decrease();
+        }
+
+    }
+
+
+    bool find(const K key) {
+        int key_hash = calculate_hash(key);
+        int index = get_hash_set_index(key_hash);
+        HashNode<K> *entry = bucket[index];
+        while(entry!=NULL){
+            if(entry->getKey()==key){
                 return true;
             }
-            i = (i + (h * h)) % sz;
-            h++;
-            if (i == bucket) {
-                break;
-            }
+            entry = entry->getNext();
         }
-        //printf("\n Key does not exist \n");
-        //return NULL;
         return false;
     }
 
-    void erase(T key){
-        int bucket = find_hash(key);
-        int i = bucket;
-        int h = 1;
-
-        /* probing through the hash table until we reach at location where there had not been an element even once */
-        while (table[i].first != unalloted){
-            if (table[i].first == filled &&  table[i].second == key) {
-
-                /* case where data exists at the location and its key matches to the given key */
-                table[i].first = deleted;
-                //table[i].second.second = NULL;
-                occupied--;
-                double balance_factor=(double) occupied / (double) sz;
-                //std::cout<<"balance fact "<<balance_factor<<" "<<occupied<<" "<<sz<<"\n";
-                if(balance_factor < lower_bound){
-                    decrease_table_size();
-                    //std::cout<<"new size "<<sz<<"\n";
-                }
-                //printf("\n Key has been removed \n");
-                return;
-
+    void print(){
+        std::vector<K> arr;
+        ///iterate over buckets
+        for(int i=0;i<table_size;i++){
+            ///print the list for each bucket
+            HashNode<K>*entry = bucket[i];
+            //std::cout<<"Bucket "<<i<<"->";
+            while(entry!=NULL){
+                arr.push_back(entry->getKey());
+                //std::cout<<entry->getKey()<<" ";
+                entry = entry->getNext();
             }
-            i = (i + (h * h)) % sz;
-            h++;
-            if (i == bucket) {
-                break;
-            }
+            //std::cout<<endl;
         }
-        //printf("\n Key does not exist \n");
+        sort(arr.begin(),arr.end());
+        for(int i=0;i<arr.size();i++){
+            std::cout<<arr[i]<<" ";
+        }
+        std::cout<<"\n";
     }
 
-    //returns true if set is empty
+    hash_set find_union(hash_set<K> other){
+        hash_set<K> un;
+        for(int i=0;i<this->table_size;i++){
+            ///print the list for each bucket
+            HashNode<K>*entry = this->bucket[i];
+            while(entry!=NULL){
+                //std::cout<<entry->getKey()<<":"<<entry->getValue()<<",";
+                un.insert(entry->getKey());
+                entry = entry->getNext();
+            }
+        }
+        for(int i=0;i<other.table_size;i++){
+            ///print the list for each bucket
+            HashNode<K>*entry = other.bucket[i];
+            while(entry!=NULL){
+                //std::cout<<entry->getKey()<<":"<<entry->getValue()<<",";
+                un.insert(entry->getKey());
+                entry = entry->getNext();
+            }
+        }
+        return un;
+    }
+    hash_set find_intersection(hash_set<K> other){
+        hash_set<K> intr;
+        for(int i=0;i<this->table_size;i++){
+            ///print the list for each bucket
+            HashNode<K>*entry = this->bucket[i];
+            while(entry!=NULL){
+                //std::cout<<entry->getKey()<<":"<<entry->getValue()<<",";
+                if(other.find(entry->getKey())){
+                    intr.insert(entry->getKey());
+                }
+                entry = entry->getNext();
+            }
+        }
+        return intr;
+    }
+    
+    hash_set find_difference(hash_set<K> other){
+        hash_set<K> diff;
+        for(int i=0;i<this->table_size;i++){
+            ///print the list for each bucket
+            HashNode<K>*entry = this->bucket[i];
+            while(entry!=NULL){
+                //std::cout<<entry->getKey()<<":"<<entry->getValue()<<",";
+                if(!other.find(entry->getKey())){
+                    diff.insert(entry->getKey());
+                }
+                entry = entry->getNext();
+            }
+        }
+        return diff;
+    }
+
     bool empty(){
-        if(occupied == 0){
+        if(getCurrentSize() == 0){
             return true;
         }
         else{
@@ -307,77 +424,7 @@ public:
     }
     
 
-    hash_set find_union(hash_set<T> other){
-        hash_set<T> un;
-        for(int i=0;i<this->sz;i++){
-            if(this->table[i].first == filled){
-                un.insert(this->table[i].second);
-            }
-        }
-        for(int i=0;i<other.sz;i++){
-            if(other.table[i].first == filled){
-                un.insert(other.table[i].second);
-            }
-        }
-        return un;
-    }
-    hash_set find_intersection(hash_set<T> other){
-        hash_set<T> intr;
-        for(int i=0;i<this->sz;i++){
-            if(this->table[i].first == filled){
-                T key=table[i].second;
-                if(other.find(key)){
-                    intr.insert(key);
-                }
-            }
-        }
-        return intr;
-    }
 
-    hash_set find_difference(hash_set<T> other){
-        hash_set<T> diff;
-        for(int i=0;i<this->sz;i++){
-            if(this->table[i].first == filled){
-                T key=table[i].second;
-                if(!other.find(key)){
-                    diff.insert(key);
-                }
-            }
-        }
-        return diff;
-    }
-
-    //for debugging
-    void print(){
-        std::vector<int> ans;
-        for(int i=0;i<sz;i++){
-            if(table[i].first == filled){
-                //std::cout<<table[i].second<<" ";
-                ans.push_back(table[i].second);
-            }
-        }
-        sort(ans.begin(),ans.end());
-        for(auto it: ans){
-            std::cout<<it<<" ";
-        }
-        std::cout<<"\n";
-    }
 };
-
-template <class T,class U>
-T test (T x,U y) {
-    std::pair<T,U> pr;
-    pr={x,y};
-    T z=pr.first+"cool";
-    std::cout<<z<<"\n";
-    return z;
-    //std::cout<<pr.first+" "+pr.second;
-}
-typedef struct node{
-    int data;
-} node;
-
-
-
 
 #endif
