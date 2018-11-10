@@ -56,7 +56,7 @@ template <class T> class tree_set{
     //set operations
     void inorder_add_to_vector(Node<T> *root,std::vector<T> &arr);
     void inorder_union(Node<T> *root,tree_set<T> &new_set);
-    void inorder_intersection(Node<T> *root,tree_set<T> other,tree_set<T> &new_set);
+    void inorder_intersection(Node<T> *root,tree_set<T> *other,tree_set<T> &new_set);
     void inorder_difference(Node<T> *root,tree_set<T> other,tree_set<T> &new_set);
 
     tree_set<T> find_union(tree_set<T> other);
@@ -66,6 +66,20 @@ template <class T> class tree_set{
     //for debugging
     void print();
 };
+/*
+int compare(int a,int b);
+
+int compare(std::string a,std::string b);
+
+int compare(std::pair<int,int> a,std::pair<int,int> b); // first compare based on second and then on basis of first
+
+void printThisNodesValue(int data);
+
+void printThisNodesValue(std::string data);
+
+void printThisNodesValue(std::pair<int,int> data);
+*/
+
 
 int compare(int a,int b){
     return a-b;
@@ -386,21 +400,56 @@ Node<T>* tree_set<T>::add_to_tree(Node<T> *root, T data){
 
     return root;
 }
-/*
+
+
+
+
 template <class T>
-T tree_set<T>::findMin(Node<T>* root){
-    while(root->left){
-        root = root->left;
+void tree_set<T>::inorder_add_to_vector(Node<T> *root,std::vector<T> &arr){
+    if(root!=NULL){
+        inorder_add_to_vector(root->left,arr);
+        //std::cout<<"\ndata: "<<root->data<<" height: "<<root->height<<" rank: "<<root->rank;
+        arr.push_back(root->data);
+        inorder_add_to_vector(root->right,arr);
     }
-    return root->data;
 }
 
 template <class T>
-void tree_set<T>::deleteMin(Node<T>* root){
-    T to_delete=findMin(root);
-    delete_node(root,to_delete);
+void tree_set<T>::inorder_union(Node<T> *root,tree_set<T> &new_set){
+    if(root!=NULL){
+        inorder_union(root->left,new_set);
+        //std::cout<<"\ndata: "<<root->data<<" height: "<<root->height<<" rank: "<<root->rank;
+        new_set.insert(root->data);
+        inorder_union(root->right,new_set);
+    }
 }
-*/
+
+template <class T>
+void tree_set<T>::inorder_intersection(Node<T> *root,tree_set<T> *other,tree_set<T> &new_set){
+    if(root!=NULL){
+        inorder_intersection(root->left,other,new_set);
+        //std::cout<<"\ndata: "<<root->data<<" height: "<<root->height<<" rank: "<<root->rank;
+        if(other->find(root->data)){
+            new_set.insert(root->data);
+        }
+        inorder_intersection(root->right,other,new_set);
+    }
+}
+
+template <class T>
+void tree_set<T>::inorder_difference(Node<T> *root,tree_set<T> other,tree_set<T> &new_set){
+    if(root!=NULL){
+        inorder_difference(root->left,other,new_set);
+        //std::cout<<"\ndata: "<<root->data<<" height: "<<root->height<<" rank: "<<root->rank;
+        if( !other.find(root->data) ){
+            new_set.insert(root->data);
+        }
+        inorder_difference(root->right,other,new_set);
+    }
+}
+
+
+
 
 //wrappers
 template <class T>
@@ -478,51 +527,6 @@ bool tree_set<T>::empty(){
 }
 
 
-//operations on set
-template <class T>
-void tree_set<T>::inorder_add_to_vector(Node<T> *root,std::vector<T> &arr){
-    if(root!=NULL){
-        inorder_add_to_vector(root->left,arr);
-        //std::cout<<"\ndata: "<<root->data<<" height: "<<root->height<<" rank: "<<root->rank;
-        arr.push_back(root->data);
-        inorder_add_to_vector(root->right,arr);
-    }
-}
-
-template <class T>
-void tree_set<T>::inorder_union(Node<T> *root,tree_set<T> &new_set){
-    if(root!=NULL){
-        inorder_union(root->left,new_set);
-        //std::cout<<"\ndata: "<<root->data<<" height: "<<root->height<<" rank: "<<root->rank;
-        new_set.insert(root->data);
-        inorder_union(root->right,new_set);
-    }
-}
-
-template <class T>
-void tree_set<T>::inorder_intersection(Node<T> *root,tree_set<T> other,tree_set<T> &new_set){
-    if(root!=NULL){
-        inorder_intersection(root->left,other,new_set);
-        //std::cout<<"\ndata: "<<root->data<<" height: "<<root->height<<" rank: "<<root->rank;
-        if(other.find(root->data)){
-            new_set.insert(root->data);
-        }
-        inorder_intersection(root->right,other,new_set);
-    }
-}
-
-template <class T>
-void tree_set<T>::inorder_difference(Node<T> *root,tree_set<T> other,tree_set<T> &new_set){
-    if(root!=NULL){
-        inorder_difference(root->left,other,new_set);
-        //std::cout<<"\ndata: "<<root->data<<" height: "<<root->height<<" rank: "<<root->rank;
-        if( !other.find(root->data) ){
-            new_set.insert(root->data);
-        }
-        inorder_difference(root->right,other,new_set);
-    }
-}
-
 template <class T>
 tree_set<T> tree_set<T>::find_union(tree_set<T> other){
         tree_set<T> new_set;
@@ -534,8 +538,19 @@ tree_set<T> tree_set<T>::find_union(tree_set<T> other){
 
 template <class T>
 tree_set<T> tree_set<T>::find_intersection(tree_set<T> other){
+    tree_set<T> *smaller;
+    tree_set<T> *bigger;
+
+    if(getRank(this->root) > getRank(other.root)){
+        smaller=&other;
+        bigger=this;
+    }
+    else{
+        smaller=this;
+        bigger=&other;
+    }
     tree_set<T> new_set;
-    inorder_intersection(this->root,other,new_set);
+    inorder_intersection(smaller->root,bigger,new_set);
     return new_set;
 }
 
@@ -552,13 +567,13 @@ void tree_set<T>::print(){
     std::vector<T> ans;
     inorder_add_to_vector(this->root,ans);
     sort(ans.begin(),ans.end());
+    //std::cout<<"printing\n";
     for(auto it: ans){
         std::cout<<it<<" ";
         //printThisNodesValue(it->data);
     }
     std::cout<<"\n";
 }
-
 
 int main(){
     tree_set<int> st1;
@@ -570,7 +585,7 @@ int main(){
     for(int i=10;i<=50;i++){
         st2.insert(i);
     }
-    tree_set<int> st3=st1.find_intersection(st2);
+    tree_set<int> st3=st2.find_intersection(st1);
     st3.print();
     tree_set<int> st4=st1.find_union(st2);
     st4.print();

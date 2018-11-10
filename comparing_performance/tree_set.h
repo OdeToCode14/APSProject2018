@@ -54,7 +54,7 @@ template <class T> class tree_set{
     //set operations
     void inorder_add_to_vector(Node<T> *root,std::vector<T> &arr);
     void inorder_union(Node<T> *root,tree_set<T> &new_set);
-    void inorder_intersection(Node<T> *root,tree_set<T> other,tree_set<T> &new_set);
+    void inorder_intersection(Node<T> *root,tree_set<T> *other,tree_set<T> &new_set);
     void inorder_difference(Node<T> *root,tree_set<T> other,tree_set<T> &new_set);
 
     tree_set<T> find_union(tree_set<T> other);
@@ -423,11 +423,11 @@ void tree_set<T>::inorder_union(Node<T> *root,tree_set<T> &new_set){
 }
 
 template <class T>
-void tree_set<T>::inorder_intersection(Node<T> *root,tree_set<T> other,tree_set<T> &new_set){
+void tree_set<T>::inorder_intersection(Node<T> *root,tree_set<T> *other,tree_set<T> &new_set){
     if(root!=NULL){
         inorder_intersection(root->left,other,new_set);
         //std::cout<<"\ndata: "<<root->data<<" height: "<<root->height<<" rank: "<<root->rank;
-        if(other.find(root->data)){
+        if(other->find(root->data)){
             new_set.insert(root->data);
         }
         inorder_intersection(root->right,other,new_set);
@@ -536,8 +536,19 @@ tree_set<T> tree_set<T>::find_union(tree_set<T> other){
 
 template <class T>
 tree_set<T> tree_set<T>::find_intersection(tree_set<T> other){
+    tree_set<T> *smaller;
+    tree_set<T> *bigger;
+
+    if(getRank(this->root) > getRank(other.root)){
+        smaller=&other;
+        bigger=this;
+    }
+    else{
+        smaller=this;
+        bigger=&other;
+    }
     tree_set<T> new_set;
-    inorder_intersection(this->root,other,new_set);
+    inorder_intersection(smaller->root,bigger,new_set);
     return new_set;
 }
 
